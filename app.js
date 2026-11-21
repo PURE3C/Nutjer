@@ -274,14 +274,10 @@ function renderPending(list) {
   const tKey = todayKey();
   const pending = list.filter((m) => !Object.keys(availOf(m.id)).some((k) => k >= tKey));
   return `<div class="card">
-    <h2>ชวนเพื่อนมากรอก</h2>
+    <h2>ใครยังไม่กรอก</h2>
     ${pending.length
-      ? `<p class="sub" style="margin-bottom:8px">ยังไม่กรอกเลย:</p><div class="chips" style="margin-bottom:12px">${pending.map((m) => `<span class="chip">${esc(m.name)}</span>`).join("")}</div>`
-      : `<p class="sub">ทุกคนกรอกแล้ว</p>`}
-    <div class="share">
-      <button class="btn line" data-act="line">ส่งลิงก์ใน LINE</button>
-      <button class="btn" data-act="copy">คัดลอกลิงก์</button>
-    </div>
+      ? `<div class="chips">${pending.map((m) => `<span class="chip">${esc(m.name)}</span>`).join("")}</div>`
+      : `<p class="empty">ทุกคนกรอกแล้ว</p>`}
   </div>`;
 }
 
@@ -302,11 +298,6 @@ function renderMain(list) {
 }
 
 // ---------------------------------------------------------------- actions
-function shareText() {
-  const url = location.href.split("#")[0];
-  return `มากรอกวันว่างกันหน่อย แค่แตะวันที่ว่าง ไม่ถึงนาที\n${url}`;
-}
-
 app.addEventListener("input", (e) => {
   if (e.target.id === "newName") state.draftName = e.target.value;
 });
@@ -368,15 +359,6 @@ app.addEventListener("click", async (e) => {
     if (act === "clear" && !confirm("ล้างวันว่างของคุณทั้งเดือนนี้?")) return;
     await save(paths);
     toast(act === "weekends" ? "เลือกเสาร์-อาทิตย์ให้แล้ว" : "ล้างแล้ว");
-  } else if (act === "line") {
-    window.open(`https://line.me/R/msg/text/?${encodeURIComponent(shareText())}`, "_blank");
-  } else if (act === "copy") {
-    try {
-      await navigator.clipboard.writeText(shareText());
-      toast("คัดลอกแล้ว ไปวางในแชทได้เลย");
-    } catch {
-      prompt("คัดลอกข้อความนี้:", shareText());
-    }
   }
 });
 

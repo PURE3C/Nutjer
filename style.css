@@ -94,7 +94,6 @@ button {
   font-weight: 600;
 }
 .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
-.btn.line { background: #06c755; color: #fff; border-color: #06c755; }
 .btn.small { min-height: 36px; padding: 4px 12px; font-size: .9rem; }
 .btn.block { width: 100%; }
 
@@ -283,9 +282,6 @@ button {
 }
 
 .empty { color: var(--muted); font-size: .9rem; margin: 0; }
-
-.share { display: flex; gap: 8px; flex-wrap: wrap; }
-.share .btn { flex: 1; }
 
 /* ---------- Toast ---------- */
 #toast {
