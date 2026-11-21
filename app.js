@@ -295,7 +295,6 @@ function renderMain(list) {
       </div>
       <button class="link" data-act="logout">ไม่ใช่ ${esc(me.name)}?</button>
     </div>
-    <div class="hint">👆 แตะวันที่คุณว่าง แค่นั้นเลย (แตะอีกทีเพื่อยกเลิก) บันทึกอัตโนมัติ</div>
     ${renderCalendar(list)}
     ${renderBest(list)}
     ${renderPending(list)}
