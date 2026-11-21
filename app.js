@@ -33,7 +33,7 @@ function toast(msg) {
 
 // ---------------------------------------------------------------- stores
 // Both stores expose: subscribe(cb), update(pathMap), addMember(name) -> id
-// pathMap is like { "avail/<memberId>/2026-12-05": true | null }
+// pathMap is like { "pavail/<planId>/<memberId>/2026-12-05": true | null }
 
 function applyPaths(data, paths) {
   for (const [path, val] of Object.entries(paths)) {
@@ -98,6 +98,10 @@ async function firebaseStore() {
 }
 
 // ---------------------------------------------------------------- state
+function planFromHash() {
+  const m = location.hash.match(/^#\/p\/([\w-]+)/);
+  return m ? m[1] : null;
+}
 const now = new Date();
 const state = {
   data: null,
@@ -106,6 +110,8 @@ const state = {
   month: now.getMonth(),
   sel: null,
   draftName: "",
+  draftPlan: "",
+  plan: planFromHash(),
 };
 let store;
 
@@ -115,7 +121,11 @@ const members = () => {
     .map(([id, v]) => ({ id, name: v.name, at: v.at || 0 }))
     .sort((a, b) => a.at - b.at || a.name.localeCompare(b.name, "th"));
 };
-const availOf = (id) => state.data?.avail?.[id] || {};
+const plans = () => Object.entries(state.data?.plans || {})
+  .map(([id, v]) => ({ id, name: v.name, at: v.at || 0 }))
+  .sort((a, b) => b.at - a.at);
+const currentPlan = () => plans().find((p) => p.id === state.plan) || null;
+const availOf = (id, pid = state.plan) => state.data?.pavail?.[pid]?.[id] || {};
 const freeOn = (key) => members().filter((m) => availOf(m.id)[key]);
 
 async function save(paths) {
@@ -128,7 +138,8 @@ function render() {
   if (!state.data) return;
   const list = members();
   if (!state.me || !list.some((m) => m.id === state.me)) renderPick(list);
-  else renderMain(list);
+  else if (currentPlan()) renderMain(list);
+  else renderHome(list);
 }
 
 function demoBanner() {
@@ -281,29 +292,83 @@ function renderPending(list) {
   </div>`;
 }
 
-function renderMain(list) {
+function planCard(p, list) {
+  const tKey = todayKey();
+  const counts = {};
+  let filled = 0;
+  let meFilled = false;
+  for (const m of list) {
+    const ks = Object.keys(availOf(m.id, p.id)).filter((k) => k >= tKey);
+    if (ks.length) { filled++; if (m.id === state.me) meFilled = true; }
+    for (const k of ks) counts[k] = (counts[k] || 0) + 1;
+  }
+  const best = Object.entries(counts).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0];
+  return `<button class="plan" data-act="open" data-id="${p.id}">
+    <span class="pname">${esc(p.name)}</span>
+    <span class="pmeta">${best ? `ว่างเยอะสุด ${fmtDate(best[0], false)} (${best[1]}/${list.length} คน)` : "ยังไม่มีใครกรอก"} · กรอกแล้ว ${filled}/${list.length}</span>
+    ${meFilled ? "" : `<span class="badge">คุณยังไม่กรอก</span>`}
+  </button>`;
+}
+
+function renderHome(list) {
   const me = list.find((m) => m.id === state.me);
+  const focused = document.activeElement?.id === "newPlan";
+  const ps = plans();
   app.innerHTML = `
     ${demoBanner()}
     <div class="top">
-      <div>
-        <h1>สวัสดี ${esc(me.name)}</h1>
-      </div>
+      <h1>สวัสดี ${esc(me.name)}</h1>
       <button class="link" data-act="logout">ไม่ใช่ ${esc(me.name)}?</button>
     </div>
+    <h2>นัดทั้งหมด</h2>
+    ${ps.length
+      ? `<div class="plans">${ps.map((p) => planCard(p, list)).join("")}</div>`
+      : `<p class="empty" style="margin-bottom:14px">ยังไม่มีนัด สร้างนัดแรกเลย</p>`}
+    <div class="card">
+      <h2>สร้างนัดใหม่</h2>
+      <form class="add-row" data-act="addPlan">
+        <input id="newPlan" maxlength="60" placeholder="เช่น เที่ยวงานวัด, เตะบอล" autocomplete="off" value="${esc(state.draftPlan)}">
+        <button class="btn primary" type="submit">สร้าง</button>
+      </form>
+    </div>`;
+  if (focused) {
+    const input = document.getElementById("newPlan");
+    input.focus();
+    input.setSelectionRange(input.value.length, input.value.length);
+  }
+}
+
+function renderMain(list) {
+  const plan = currentPlan();
+  app.innerHTML = `
+    ${demoBanner()}
+    <button class="back" data-act="home">‹ นัดทั้งหมด</button>
+    <h1>${esc(plan.name)}</h1>
     ${renderCalendar(list)}
     ${renderBest(list)}
     ${renderPending(list)}
+    <div class="foot"><button class="link" data-act="delPlan">ลบนัดนี้</button></div>
   `;
 }
 
 // ---------------------------------------------------------------- actions
 app.addEventListener("input", (e) => {
   if (e.target.id === "newName") state.draftName = e.target.value;
+  if (e.target.id === "newPlan") state.draftPlan = e.target.value;
 });
 
 app.addEventListener("submit", async (e) => {
   e.preventDefault();
+  if (e.target.dataset.act === "addPlan") {
+    const name = state.draftPlan.trim();
+    if (!name) return toast("พิมพ์ชื่อนัดก่อนนะ");
+    const id = newId();
+    try { await store.update({ [`plans/${id}`]: { name, at: Date.now(), by: state.me } }); }
+    catch (err) { console.error(err); return toast("สร้างนัดไม่สำเร็จ ลองใหม่อีกที"); }
+    state.draftPlan = "";
+    location.hash = `#/p/${id}`;
+    return;
+  }
   const name = state.draftName.trim();
   if (!name) return toast("พิมพ์ชื่อก่อนนะ");
   const exists = members().find((m) => m.name.toLowerCase() === name.toLowerCase());
@@ -328,6 +393,20 @@ app.addEventListener("click", async (e) => {
     lsSet(ME_KEY, state.me);
     render();
     window.scrollTo(0, 0);
+  } else if (act === "open") {
+    location.hash = `#/p/${el.dataset.id}`;
+  } else if (act === "home") {
+    location.hash = "";
+  } else if (act === "delPlan") {
+    const plan = currentPlan();
+    if (!plan || !confirm(`ลบนัด "${plan.name}"? วันว่างที่ทุกคนกรอกไว้จะหายหมด`)) return;
+    const paths = { [`plans/${plan.id}`]: null };
+    for (const [mid, dates] of Object.entries(state.data?.pavail?.[plan.id] || {})) {
+      for (const k of Object.keys(dates)) paths[`pavail/${plan.id}/${mid}/${k}`] = null;
+    }
+    await save(paths);
+    location.hash = "";
+    toast("ลบนัดแล้ว");
   } else if (act === "logout") {
     state.me = null;
     lsSet(ME_KEY, null);
@@ -337,7 +416,7 @@ app.addEventListener("click", async (e) => {
     const on = !availOf(state.me)[k];
     state.sel = k;
     if (navigator.vibrate) navigator.vibrate(10);
-    await save({ [`avail/${state.me}/${k}`]: on ? true : null });
+    await save({ [`pavail/${state.plan}/${state.me}/${k}`]: on ? true : null });
   } else if (act === "prev" || act === "next") {
     const d = new Date(state.year, state.month + (act === "next" ? 1 : -1), 1);
     state.year = d.getFullYear();
@@ -352,14 +431,21 @@ app.addEventListener("click", async (e) => {
       const date = new Date(state.year, state.month, d);
       const k = keyOf(date);
       if (k < tKey) continue;
-      if (act === "weekends" && (date.getDay() === 0 || date.getDay() === 6)) paths[`avail/${state.me}/${k}`] = true;
-      if (act === "clear" && availOf(state.me)[k]) paths[`avail/${state.me}/${k}`] = null;
+      if (act === "weekends" && (date.getDay() === 0 || date.getDay() === 6)) paths[`pavail/${state.plan}/${state.me}/${k}`] = true;
+      if (act === "clear" && availOf(state.me)[k]) paths[`pavail/${state.plan}/${state.me}/${k}`] = null;
     }
     if (!Object.keys(paths).length) return toast(act === "clear" ? "เดือนนี้ยังไม่ได้เลือกวันไหน" : "ไม่มีเสาร์-อาทิตย์เหลือในเดือนนี้แล้ว");
     if (act === "clear" && !confirm("ล้างวันว่างของคุณทั้งเดือนนี้?")) return;
     await save(paths);
     toast(act === "weekends" ? "เลือกเสาร์-อาทิตย์ให้แล้ว" : "ล้างแล้ว");
   }
+});
+
+window.addEventListener("hashchange", () => {
+  state.plan = planFromHash();
+  state.sel = null;
+  render();
+  window.scrollTo(0, 0);
 });
 
 // ---------------------------------------------------------------- boot

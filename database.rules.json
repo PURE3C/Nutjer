@@ -7,6 +7,22 @@
         ".validate": "newData.hasChildren(['name']) && newData.child('name').isString() && newData.child('name').val().length > 0 && newData.child('name').val().length <= 30"
       }
     },
+    "plans": {
+      "$pid": {
+        ".write": true,
+        ".validate": "newData.hasChildren(['name']) && newData.child('name').isString() && newData.child('name').val().length > 0 && newData.child('name').val().length <= 60"
+      }
+    },
+    "pavail": {
+      "$pid": {
+        "$id": {
+          "$date": {
+            ".write": "root.child('members').child($id).exists() && root.child('plans').child($pid).exists()",
+            ".validate": "$date.matches(/^\\d{4}-\\d{2}-\\d{2}$/) && newData.val() === true"
+          }
+        }
+      }
+    },
     "avail": {
       "$id": {
         "$date": {
