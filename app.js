@@ -83,7 +83,7 @@ async function firebaseStore() {
     subscribe(cb) {
       onValue(ref(db), (snap) => cb(snap.val() || {}), (err) => {
         console.error(err);
-        app.innerHTML = `<div class="card"><h2>เชื่อมต่อฐานข้อมูลไม่ได้ 😢</h2>
+        app.innerHTML = `<div class="card"><h2>เชื่อมต่อฐานข้อมูลไม่ได้</h2>
           <p class="sub">${esc(err.message)}</p>
           <p class="sub">เช็ค Rules ของ Realtime Database ใน Firebase Console (ดู README)</p></div>`;
       });
@@ -133,7 +133,7 @@ function render() {
 
 function demoBanner() {
   return store.demo
-    ? `<div class="demo-banner">⚠️ โหมดทดลอง: ข้อมูลอยู่แค่ในเครื่องนี้ ใส่ค่า Firebase ใน <code>firebase-config.js</code> เพื่อให้เพื่อนเห็นด้วย</div>`
+    ? `<div class="demo-banner">โหมดทดลอง: ข้อมูลอยู่แค่ในเครื่องนี้ ใส่ค่า Firebase ใน <code>firebase-config.js</code> เพื่อให้เพื่อนเห็นด้วย</div>`
     : "";
 }
 
@@ -141,7 +141,7 @@ function renderPick(list) {
   const focused = document.activeElement?.id === "newName";
   app.innerHTML = `
     ${demoBanner()}
-    <h1>📅 ${esc(groupName)}</h1>
+    <h1>${esc(groupName)}</h1>
     <p class="sub">${list.length ? "แตะชื่อตัวเองเลย" : "ยังไม่มีใครเลย ใส่ชื่อตัวเองเป็นคนแรก"}</p>
     ${list.length ? `<div class="names">${list.map((m) =>
       `<button class="name-btn" data-act="pick" data-id="${m.id}">${esc(m.name)}</button>`).join("")}</div>` : ""}
@@ -196,7 +196,7 @@ function renderCalendar(list) {
     ].filter(Boolean).join(" ");
     const label = `${d} ${MONTHS[month]}${mine[k] ? " (คุณว่าง)" : ""}, ว่าง ${count} จาก ${total} คน`;
     cells += `<button class="${cls}" data-act="day" data-k="${k}" ${past ? "disabled" : ""} aria-label="${label}" aria-pressed="${!!mine[k]}">
-      <span class="n">${d}</span><span class="c">${count ? (count === total && total > 1 ? "🎉" : `${count}/${total}`) : ""}</span>
+      <span class="n">${d}</span><span class="c">${count ? (count === total && total > 1 ? "ครบ" : `${count}/${total}`) : ""}</span>
     </button>`;
   }
 
@@ -211,10 +211,10 @@ function renderCalendar(list) {
       <div class="legend">
         <span><i style="border:2px solid var(--accent)"></i>วันที่คุณว่าง</span>
         <span><i style="background:var(--heat-3)"></i>เขียวเข้ม = ว่างเยอะ</span>
-        <span>🎉 = ว่างครบทุกคน</span>
+        <span><i style="box-shadow:0 0 0 2px var(--gold) inset"></i>ว่างครบทุกคน</span>
       </div>
       <div class="quick">
-        <button class="btn small" data-act="weekends">✅ ว่างทุก ส.-อา. เดือนนี้</button>
+        <button class="btn small" data-act="weekends">ว่างทุก ส.-อา. เดือนนี้</button>
         <button class="btn small" data-act="clear">ล้างของฉันเดือนนี้</button>
       </div>
       ${state.sel ? renderDetail(state.sel, list) : ""}
@@ -233,7 +233,7 @@ function renderDetail(k, list) {
   const notFree = list.filter((m) => !free.some((f) => f.id === m.id));
   return `<div class="detail">
     <b>${fmtDate(k)}</b>
-    ${free.length ? `<div class="chips">${free.map((m) => `<span class="chip">✅ ${esc(m.name)}</span>`).join("")}</div>` : `<p class="empty">ยังไม่มีใครว่าง</p>`}
+    ${free.length ? `<div class="chips">${free.map((m) => `<span class="chip">${esc(m.name)}</span>`).join("")}</div>` : `<p class="empty">ยังไม่มีใครว่าง</p>`}
     ${notFree.length && free.length ? `<p class="miss">ยังไม่ว่าง/ยังไม่กรอก: ${notFree.map((m) => esc(m.name)).join(", ")}</p>` : ""}
   </div>`;
 }
@@ -257,7 +257,7 @@ function renderBest(list) {
     return `<li>
       <div class="date"><span class="m">${DOW_LONG[d.getDay()]}</span><span class="d">${d.getDate()}</span><span class="m">${MONTHS_SHORT[d.getMonth()]} ${String(d.getFullYear() + 543).slice(2)}</span></div>
       <div class="who">
-        <div class="cnt">${c === list.length ? "🎉 ว่างครบทุกคน!" : `ว่าง ${c} จาก ${list.length} คน`}</div>
+        <div class="cnt">${c === list.length ? "ว่างครบทุกคน!" : `ว่าง ${c} จาก ${list.length} คน`}</div>
         <div>${free.map((m) => esc(m.name)).join(", ")}</div>
         ${miss.length ? `<div class="miss">ขาด: ${miss.map((m) => esc(m.name)).join(", ")}</div>` : ""}
       </div>
@@ -265,7 +265,7 @@ function renderBest(list) {
   }).join("");
 
   return `<div class="card">
-    <h2>🏆 วันที่ว่างตรงกันเยอะสุด</h2>
+    <h2>วันที่ว่างตรงกันเยอะสุด</h2>
     ${items ? `<ul class="best">${items}</ul>` : `<p class="empty">ยังไม่มีวันที่ว่างตรงกัน รอเพื่อนกรอกก่อนนะ</p>`}
   </div>`;
 }
@@ -274,10 +274,10 @@ function renderPending(list) {
   const tKey = todayKey();
   const pending = list.filter((m) => !Object.keys(availOf(m.id)).some((k) => k >= tKey));
   return `<div class="card">
-    <h2>📣 ชวนเพื่อนมากรอก</h2>
+    <h2>ชวนเพื่อนมากรอก</h2>
     ${pending.length
-      ? `<p class="sub" style="margin-bottom:8px">ยังไม่กรอกเลย:</p><div class="chips" style="margin-bottom:12px">${pending.map((m) => `<span class="chip">😴 ${esc(m.name)}</span>`).join("")}</div>`
-      : `<p class="sub">ทุกคนกรอกแล้ว 👍</p>`}
+      ? `<p class="sub" style="margin-bottom:8px">ยังไม่กรอกเลย:</p><div class="chips" style="margin-bottom:12px">${pending.map((m) => `<span class="chip">${esc(m.name)}</span>`).join("")}</div>`
+      : `<p class="sub">ทุกคนกรอกแล้ว</p>`}
     <div class="share">
       <button class="btn line" data-act="line">ส่งลิงก์ใน LINE</button>
       <button class="btn" data-act="copy">คัดลอกลิงก์</button>
@@ -291,7 +291,7 @@ function renderMain(list) {
     ${demoBanner()}
     <div class="top">
       <div>
-        <h1>สวัสดี ${esc(me.name)} 👋</h1>
+        <h1>สวัสดี ${esc(me.name)}</h1>
       </div>
       <button class="link" data-act="logout">ไม่ใช่ ${esc(me.name)}?</button>
     </div>
@@ -304,7 +304,7 @@ function renderMain(list) {
 // ---------------------------------------------------------------- actions
 function shareText() {
   const url = location.href.split("#")[0];
-  return `มากรอกวันว่างกันหน่อย แค่แตะวันที่ว่าง ไม่ถึงนาที 🙏\n${url}`;
+  return `มากรอกวันว่างกันหน่อย แค่แตะวันที่ว่าง ไม่ถึงนาที\n${url}`;
 }
 
 app.addEventListener("input", (e) => {
@@ -367,7 +367,7 @@ app.addEventListener("click", async (e) => {
     if (!Object.keys(paths).length) return toast(act === "clear" ? "เดือนนี้ยังไม่ได้เลือกวันไหน" : "ไม่มีเสาร์-อาทิตย์เหลือในเดือนนี้แล้ว");
     if (act === "clear" && !confirm("ล้างวันว่างของคุณทั้งเดือนนี้?")) return;
     await save(paths);
-    toast(act === "weekends" ? "เลือกเสาร์-อาทิตย์ให้แล้ว ✅" : "ล้างแล้ว");
+    toast(act === "weekends" ? "เลือกเสาร์-อาทิตย์ให้แล้ว" : "ล้างแล้ว");
   } else if (act === "line") {
     window.open(`https://line.me/R/msg/text/?${encodeURIComponent(shareText())}`, "_blank");
   } else if (act === "copy") {
@@ -387,7 +387,7 @@ app.addEventListener("click", async (e) => {
     store = configured ? await firebaseStore() : localStore();
   } catch (e) {
     console.error(e);
-    app.innerHTML = `<div class="card"><h2>โหลดไม่สำเร็จ 😢</h2><p class="sub">เช็คอินเทอร์เน็ตแล้วลองรีเฟรชอีกที</p></div>`;
+    app.innerHTML = `<div class="card"><h2>โหลดไม่สำเร็จ</h2><p class="sub">เช็คอินเทอร์เน็ตแล้วลองรีเฟรชอีกที</p></div>`;
     return;
   }
   store.subscribe((data) => {
