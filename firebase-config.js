@@ -10,5 +10,5 @@ export const firebaseConfig = {
   appId: "1:97816769249:web:22bbcc7bdf684ec3733da0",
 };
 
-// ชื่อแกงค์ (แสดงบนหัวเว็บ)
-export const groupName = "แกงค์เรา";
+// หัวข้อเว็บ (แสดงบนหน้าแรก)
+export const groupName = "พูลวิลล่าแม่งว่างวันไหน??";

@@ -141,8 +141,8 @@ function renderPick(list) {
   const focused = document.activeElement?.id === "newName";
   app.innerHTML = `
     ${demoBanner()}
-    <h1>📅 ${esc(groupName)} ว่างวันไหน?</h1>
-    <p class="sub">${list.length ? "แตะชื่อตัวเองเลย (ครั้งเดียวพอ เว็บจำให้)" : "ยังไม่มีใครเลย ใส่ชื่อตัวเองเป็นคนแรก"}</p>
+    <h1>📅 ${esc(groupName)}</h1>
+    <p class="sub">${list.length ? "แตะชื่อตัวเองเลย" : "ยังไม่มีใครเลย ใส่ชื่อตัวเองเป็นคนแรก"}</p>
     ${list.length ? `<div class="names">${list.map((m) =>
       `<button class="name-btn" data-act="pick" data-id="${m.id}">${esc(m.name)}</button>`).join("")}</div>` : ""}
     <div class="card">
