@@ -20,10 +20,10 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #111412;
-    --card: #1a1e1b;
+    --card: #1f2521;
     --text: #eef1ee;
-    --muted: #9aa39c;
-    --line: #2b312d;
+    --muted: #b3bcb5;
+    --line: #38403a;
     --accent: #22c55e;
     --accent-ink: #06210f;
     --heat-0: #1a1e1b;
@@ -332,8 +332,27 @@ button {
   color: var(--muted);
 }
 .plan:active { border-color: var(--accent); }
-.pname { font-size: 1.1rem; font-weight: 700; word-break: break-word; }
-.pmeta { font-size: .85rem; color: var(--muted); }
+.pname { font-size: 1.15rem; font-weight: 700; word-break: break-word; margin-bottom: 2px; }
+.pbest { font-size: .9rem; }
+.pbest b { color: var(--accent); }
+.pfill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: .8rem;
+  color: var(--muted);
+  width: 100%;
+  margin-top: 4px;
+}
+.bar {
+  flex: 1;
+  max-width: 140px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--line);
+  overflow: hidden;
+}
+.bar span { display: block; height: 100%; background: var(--accent); border-radius: 999px; }
 .badge {
   margin-top: 4px;
   font-size: .75rem;
