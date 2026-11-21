@@ -1,0 +1,19 @@
+{
+  "rules": {
+    ".read": true,
+    "members": {
+      "$id": {
+        ".write": true,
+        ".validate": "newData.hasChildren(['name']) && newData.child('name').isString() && newData.child('name').val().length > 0 && newData.child('name').val().length <= 30"
+      }
+    },
+    "avail": {
+      "$id": {
+        "$date": {
+          ".write": "root.child('members').child($id).exists()",
+          ".validate": "$date.matches(/^\\d{4}-\\d{2}-\\d{2}$/) && newData.val() === true"
+        }
+      }
+    }
+  }
+}
