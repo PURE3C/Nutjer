@@ -1,4 +1,4 @@
-import { firebaseConfig, groupName } from "./firebase-config.js";
+import { firebaseConfig, groupName } from "./firebase-config.js?v=9";
 
 const FIREBASE_VERSION = "10.12.2";
 const ME_KEY = "nutjer.me";
@@ -303,9 +303,14 @@ function planCard(p, list) {
     for (const k of ks) counts[k] = (counts[k] || 0) + 1;
   }
   const best = Object.entries(counts).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0];
+  const d = best && parseKey(best[0]);
+  const pct = list.length ? Math.round((filled / list.length) * 100) : 0;
   return `<button class="plan" data-act="open" data-id="${p.id}">
     <span class="pname">${esc(p.name)}</span>
-    <span class="pmeta">${best ? `ว่างเยอะสุด ${fmtDate(best[0], false)} (${best[1]}/${list.length} คน)` : "ยังไม่มีใครกรอก"} · กรอกแล้ว ${filled}/${list.length}</span>
+    ${best
+      ? `<span class="pbest">ว่างเยอะสุด <b>${DOW_LONG[d.getDay()]} ${fmtDate(best[0], false)}</b> · ${best[1]}/${list.length} คน</span>`
+      : `<span class="pbest">ยังไม่มีใครกรอก</span>`}
+    <span class="pfill"><span class="bar"><span style="width:${pct}%"></span></span>กรอกแล้ว ${filled}/${list.length}</span>
     ${meFilled ? "" : `<span class="badge">คุณยังไม่กรอก</span>`}
   </button>`;
 }
