@@ -327,7 +327,7 @@ function renderHome(list) {
     <div class="card">
       <h2>สร้างนัดใหม่</h2>
       <form class="add-row" data-act="addPlan">
-        <input id="newPlan" maxlength="60" placeholder="เช่น เที่ยวงานวัด, เตะบอล" autocomplete="off" value="${esc(state.draftPlan)}">
+        <input id="newPlan" maxlength="60" placeholder="พิมพ์ชื่อนัด" autocomplete="off" value="${esc(state.draftPlan)}">
         <button class="btn primary" type="submit">สร้าง</button>
       </form>
     </div>`;
