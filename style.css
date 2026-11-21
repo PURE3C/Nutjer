@@ -46,7 +46,11 @@ body {
   font-size: 16px;
   line-height: 1.5;
   -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation; /* no double-tap zoom */
+  -webkit-text-size-adjust: 100%;
 }
+
+button, input { touch-action: manipulation; }
 
 #app {
   max-width: 520px;
@@ -132,6 +136,7 @@ button {
 .add-row { display: flex; gap: 8px; }
 .add-row input {
   flex: 1;
+  font-size: 16px; /* iOS zooms on inputs < 16px */
   min-width: 0;
   font: inherit;
   padding: 10px 14px;
@@ -217,7 +222,7 @@ button {
   color: var(--accent);
 }
 .day.all { box-shadow: 0 0 0 2px var(--gold) inset; }
-.day.all .c { color: var(--text); font-weight: 700; }
+.day.all .c { color: var(--text); font-weight: 700; font-size: .75rem; }
 .day.past { opacity: .35; cursor: default; }
 .day.today .n { text-decoration: underline; text-underline-offset: 3px; }
 .day.sel { outline: 2px dashed var(--text); outline-offset: 1px; }
